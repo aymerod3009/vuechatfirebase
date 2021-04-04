@@ -1,7 +1,7 @@
 <template>
 	<div class="window-container" :class="{ 'window-mobile': isDevice }">
 		<form @submit.prevent="createRoom" v-if="addNewRoom">
-			<input type="text" placeholder="Add username" v-model="addRoomUsername" />
+			<input type="text" placeholder="Crear Sala" v-model="addRoomUsername" />
 			<button type="submit" :disabled="disableForm || !addRoomUsername">
 				Create Room
 			</button>
@@ -11,7 +11,12 @@
 		</form>
 
 		<form @submit.prevent="addRoomUser" v-if="inviteRoomId">
-			<input type="text" placeholder="Add username" v-model="invitedUsername" />
+      <select  v-model="invitedUsername">
+        <option v-for="user in users" :key="user._id" :value="user._id">
+          {{ user.firstName }}{{user.lastName}}
+        </option>
+      </select>
+<!--			<input type="text" placeholder="Agregar Usuario" v-model="invitedUsername" />-->
 			<button type="submit" :disabled="disableForm || !invitedUsername">
 				Add User
 			</button>
@@ -69,12 +74,12 @@
 
 <script>
 import {
-	firebase,
-	roomsRef,
-	messagesRef,
-	usersRef,
-	filesRef,
-	deleteDbField
+  firebase,
+  roomsRef,
+  messagesRef,
+  usersRef,
+  filesRef,
+  deleteDbField, db
 } from '@/firestore'
 import { parseTimestamp, isSameDay } from '@/utils/dates'
 import ChatWindow from './../../src/ChatWindow'
@@ -95,6 +100,7 @@ export default {
 			roomsPerPage: 15,
 			rooms: [],
 			roomId: '',
+      users:[],
 			startRooms: null,
 			endRooms: null,
 			roomsLoaded: false,
@@ -134,8 +140,30 @@ export default {
 			// ,dbRequestCount: 0
 		}
 	},
+  created() {
+    db.collection('users').onSnapshot((snapshotChange)=>{
+      this.users=[];
+      snapshotChange.forEach((doc)=>{
+        this.users.push({
+          key: doc.id,
+          firstName: doc.data().firstName,
+          _id:doc.data().userId,
+          lastName: doc.data().lastName,
+          userName: doc.data().firstName,
+          email: doc.data().email,
+          password: doc.data().password,
+          selected0: doc.data().selected0,
+          selected1: doc.data().selected1,
+          selected2: doc.data().selected2,
+          avatar:doc.data().fileurl,
+          type: doc.data().type,
+          userId: doc.data().userId
+        })
+      })
+    })
+  },
 
-	mounted() {
+  mounted() {
 		this.fetchRooms()
 		this.updateUserOnlineStatus()
 	},
@@ -150,7 +178,10 @@ export default {
 		},
 		screenHeight() {
 			return this.isDevice ? window.innerHeight + 'px' : 'calc(100vh - 80px)'
-		}
+		},
+    showOptions() {
+      return !this.isDevice || this.showDemoOptions
+    }
 	},
 
 	methods: {

@@ -4,10 +4,10 @@
 			class="app-container"
 			:class="{ 'app-mobile': isDevice, 'app-mobile-dark': theme === 'dark' }"
 		>
-			 <div>
-				<button @click="resetData">Clear Data</button>
-				<button @click="addData" :disabled="updatingData">Add Data</button>
-			</div>
+<!--			 <div>-->
+<!--				<button @click="resetData">Clear Data</button>-->
+<!--				<button @click="addData" :disabled="updatingData">Add Data</button>-->
+<!--			</div>-->
 			<span
 				class="user-logged"
 				:class="{ 'user-logged-dark': theme === 'dark' }"
@@ -17,7 +17,7 @@
 			</span>
 			<select v-model="currentUserId" v-if="showOptions">
 				<option v-for="user in users" :key="user._id" :value="user._id">
-					{{ user.username }}
+					{{ user.firstName }}{{user.lastName}}
 				</option>
 			</select>
 
@@ -47,7 +47,7 @@
 </template>
 
 <script>
-import { roomsRef, usersRef } from '@/firestore'
+import { db, roomsRef, usersRef } from '@/firestore'
 import ChatContainer from './ChatContainer'
 
 export default {
@@ -60,22 +60,22 @@ export default {
 			theme: 'light',
 			showChat: true,
 			users: [
-				{
-					_id: '6R0MijpK6M4AIrwaaCY2',
-					username: 'Luke',
-					avatar: 'https://66.media.tumblr.com/avatar_c6a8eae4303e_512.pnj'
-				},
-				{
-					_id: 'SGmFnBZB4xxMv9V4CVlW',
-					username: 'Leia',
-					avatar: 'https://avatarfiles.alphacoders.com/184/thumb-184913.jpg'
-				},
-				{
-					_id: '6jMsIXUrBHBj7o2cRlau',
-					username: 'Yoda',
-					avatar:
-						'https://vignette.wikia.nocookie.net/teamavatarone/images/4/45/Yoda.jpg/revision/latest?cb=20130224160049'
-				}
+				// {
+				// 	_id: '6R0MijpK6M4AIrwaaCY2',
+				// 	username: 'Luke',
+				// 	avatar: 'https://66.media.tumblr.com/avatar_c6a8eae4303e_512.pnj'
+				// },
+				// {
+				// 	_id: 'SGmFnBZB4xxMv9V4CVlW',
+				// 	username: 'Leia',
+				// 	avatar: 'https://avatarfiles.alphacoders.com/184/thumb-184913.jpg'
+				// },
+				// {
+				// 	_id: '6jMsIXUrBHBj7o2cRlau',
+				// 	username: 'Yoda',
+				// 	avatar:
+				// 		'https://vignette.wikia.nocookie.net/teamavatarone/images/4/45/Yoda.jpg/revision/latest?cb=20130224160049'
+				// }
 			],
 			currentUserId: '1EtPgg72tH52YfCTNq06',
 			isDevice: false,
@@ -91,7 +91,7 @@ export default {
 		})
 	},
 
-	watch: {
+  watch: {
 		currentUserId() {
 			this.showChat = false
 			setTimeout(() => (this.showChat = true), 150)
@@ -103,8 +103,30 @@ export default {
 			return !this.isDevice || this.showDemoOptions
 		}
 	},
+  created() {
+    db.collection('users').onSnapshot((snapshotChange)=>{
+      this.users=[];
+      snapshotChange.forEach((doc)=>{
+        this.users.push({
+          key: doc.id,
+          firstName: doc.data().firstName,
+          _id:doc.data().userId,
+          lastName: doc.data().lastName,
+          userName: doc.data().firstName,
+          email: doc.data().email,
+          password: doc.data().password,
+          selected0: doc.data().selected0,
+          selected1: doc.data().selected1,
+          selected2: doc.data().selected2,
+          avatar:doc.data().fileurl,
+          type: doc.data().type,
+          userId: doc.data().userId
+        })
+      })
+    })
+  },
 
-	methods: {
+  methods: {
 		resetData() {
 			roomsRef.get().then(val => {
 				val.forEach(async val => {

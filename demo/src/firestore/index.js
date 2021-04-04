@@ -4,13 +4,14 @@ import 'firebase/database'
 import 'firebase/storage'
 
 const config ={
-  apiKey: "AIzaSyCNLhpb8Wh0a7kl1KGbbrrwkNi90CoEJxA",
-  authDomain: "av-aprendercreando-dev.firebaseapp.com",
-  projectId: "av-aprendercreando-dev",
-  storageBucket: "av-aprendercreando-dev.appspot.com",
-  messagingSenderId: "772430189483",
-  appId: "1:772430189483:web:b41de21ddd753c8233b8ee",
-  measurementId: "G-CZLKZN2KQJ"
+  apiKey: "AIzaSyDwfnwmbzGzIqx2y3rP_FppdUrh-6xUAhw",
+  authDomain: "festive-avenue-300516.firebaseapp.com",
+  databaseURL: "https://festive-avenue-300516-default-rtdb.firebaseio.com",
+  projectId: "festive-avenue-300516",
+  storageBucket: "festive-avenue-300516.appspot.com",
+  messagingSenderId: "14517080523",
+  appId: "1:14517080523:web:4bd43b613753ff26e7a64e",
+  measurementId: "G-60C41TF6V4"
 }
 
 	// process.env.NODE_ENV === 'development'
