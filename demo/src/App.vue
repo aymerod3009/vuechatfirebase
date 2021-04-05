@@ -17,7 +17,7 @@
 			</span>
 			<select v-model="currentUserId" v-if="showOptions">
 				<option v-for="user in users" :key="user._id" :value="user._id">
-					{{ user._id}}
+					{{ user.userName}}
 				</option>
 			</select>
 

@@ -13,7 +13,7 @@
 		<form @submit.prevent="addRoomUser" v-if="inviteRoomId">
       <select  v-model="invitedUsername">
         <option v-for="user in users" :key="user._id" :value="user._id">
-          {{ user._id}}
+          {{ user.userName}}
         </option>
       </select>
 <!--			<input type="text" placeholder="Agregar Usuario" v-model="invitedUsername" />-->
