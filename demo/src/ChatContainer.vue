@@ -747,11 +747,8 @@ export default {
 
 		async createRoom() {
 			this.disableForm = true
-
-			const { id } = await usersRef.add({ username: this.addRoomUsername })
-			await usersRef.doc(id).update({ _id: id })
 			await roomsRef.add({
-				users: [id, this.currentUserId],
+				users: [ this.currentUserId],
 				lastUpdated: new Date()
 			})
 
@@ -768,12 +765,9 @@ export default {
 		async addRoomUser() {
 			this.disableForm = true
 
-			const { id } = await usersRef.add({ username: this.invitedUsername })
-			await usersRef.doc(id).update({ _id: id })
-
 			await roomsRef
 				.doc(this.inviteRoomId)
-				.update({ users: firebase.firestore.FieldValue.arrayUnion(id) })
+				.update({ users: firebase.firestore.FieldValue.arrayUnion(this.invitedUsername) })
 
 			this.inviteRoomId = null
 			this.invitedUsername = ''
