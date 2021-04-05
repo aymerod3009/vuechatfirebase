@@ -146,12 +146,12 @@ export default {
       snapshotChange.forEach((doc)=>{
         this.users.push({
           key: doc.id,
-          firstName: doc.data().firstName,
           _id:doc.data().userId,
           lastName: doc.data().lastName,
-          userName: doc.data().firstName,
+          firstName: doc.data().firstName,
           email: doc.data().email,
           password: doc.data().password,
+          userName: doc.data().username,
           selected0: doc.data().selected0,
           selected1: doc.data().selected1,
           selected2: doc.data().selected2,
