@@ -17,7 +17,7 @@
 			</span>
 			<select v-model="currentUserId" v-if="showOptions">
 				<option v-for="user in users" :key="user._id" :value="user._id">
-					{{ user.firstName }}{{user.lastName}}
+					{{ user._id}}
 				</option>
 			</select>
 
@@ -110,17 +110,17 @@ export default {
         this.users.push({
           key: doc.id,
           firstName: doc.data().firstName,
-          _id:doc.data().userId,
+          _id:doc.data()._id,
           lastName: doc.data().lastName,
-          userName: doc.data().firstName,
+          userName: doc.data().username,
           email: doc.data().email,
           password: doc.data().password,
           selected0: doc.data().selected0,
           selected1: doc.data().selected1,
           selected2: doc.data().selected2,
-          avatar:doc.data().fileurl,
+          avatar:doc.data().avatar,
           type: doc.data().type,
-          userId: doc.data().userId
+          // userId: doc.data().userId
         })
       })
     })
