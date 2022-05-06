@@ -749,6 +749,28 @@ export default {
 			this.disableForm = true
 			await roomsRef.add({
 				users: [ this.currentUserId],
+        case_id: '626c33009ebc606ee77f4506',
+        createdAt: new Date(),
+        curator: null,
+        in_revision: false,
+        is_at_commission: false,
+        is_attended: false,
+        is_curated: false,
+        is_spam: false,
+        rpp: false,
+        state: "in_review",
+        supervisor: null,
+        supervisor_id: null,
+        title: 'Prueba chat Rotafono',
+        sender: {
+          email: 'samurc.net@hotmail.com',
+          firstname: 'Samuel',
+          lastname: 'Cusi',
+          phone: null,
+          profile_image: 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=10159900073569850&height=50&width=50&ext=1653749363&hash=AeStFhCnzga7A7TBP4A',
+          user_id: '626aa97448f69d556274966f',
+          username: 'Samuel'
+        },
 				lastUpdated: new Date()
 			})
 
