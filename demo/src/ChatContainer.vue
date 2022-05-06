@@ -310,7 +310,7 @@ export default {
 
 		listenLastMessage(room) {
 			const listener = messagesRef(room.roomId)
-				.orderBy('timestamp', 'desc')
+				.orderBy('createdAt', 'desc')
 				.limit(1)
 				.onSnapshot(messages => {
 					// this.incrementDbCounter('Listen Last Room Message', messages.size)
@@ -336,7 +336,7 @@ export default {
 		},
 
 		formatLastMessage(message) {
-			if (!message.timestamp) return
+			if (!message.createdAt) return
 
 			let content = message.content
 			if (message.file)
@@ -347,14 +347,14 @@ export default {
 				...message,
 				...{
 					content,
-					timestamp: this.formatTimestamp(
-						new Date(message.timestamp.seconds * 1000),
-						message.timestamp
+          createdAt: this.formatTimestamp(
+						new Date(message.createdAt.seconds * 1000),
+						message.createdAt
 					),
 					distributed: true,
-					seen: message.sender_id === this.currentUserId ? message.seen : null,
+					seen: message.user.user_id === this.currentUserId ? message.seen : null,
 					new:
-						message.sender_id !== this.currentUserId &&
+						message.user.user_id !== this.currentUserId &&
 						(!message.seen || !message.seen[this.currentUserId])
 				}
 			}
@@ -376,7 +376,7 @@ export default {
 
 			let ref = messagesRef(room.roomId)
 
-			let query = ref.orderBy('timestamp', 'desc').limit(this.messagesPerPage)
+			let query = ref.orderBy('createdAt', 'desc').limit(this.messagesPerPage)
 
 			if (this.startMessages) query = query.startAfter(this.startMessages)
 
@@ -391,7 +391,7 @@ export default {
 				if (this.startMessages) this.endMessages = this.startMessages
 				this.startMessages = messages.docs[messages.docs.length - 1]
 
-				let listenerQuery = ref.orderBy('timestamp')
+				let listenerQuery = ref.orderBy('createdAt')
 
 				if (this.startMessages)
 					listenerQuery = listenerQuery.startAfter(this.startMessages)
@@ -430,7 +430,7 @@ export default {
 
 		markMessagesSeen(room, message) {
 			if (
-				message.data().sender_id !== this.currentUserId &&
+				message.data().user.user_id !== this.currentUserId &&
 				(!message.data().seen || !message.data().seen[this.currentUserId])
 			) {
 				messagesRef(room.roomId)
@@ -443,19 +443,21 @@ export default {
 
 		formatMessage(room, message) {
 			const senderUser = room.users.find(
-				user => message.data().sender_id === user._id
+				user => message.data().user.user_id === user._id
 			)
 
-			const { sender_id, timestamp } = message.data()
+			const {  createdAt } = message.data()
+      const user = message.data().user.user_id
 
-			return {
+
+      return {
 				...message.data(),
 				...{
-					senderId: sender_id,
+					senderId: user,
 					_id: message.id,
-					seconds: timestamp.seconds,
-					timestamp: parseTimestamp(timestamp, 'HH:mm'),
-					date: parseTimestamp(timestamp, 'DD MMMM YYYY'),
+					seconds: createdAt.seconds,
+          createdAt: parseTimestamp(createdAt, 'HH:mm'),
+					date: parseTimestamp(createdAt, 'DD MMMM YYYY'),
 					username: senderUser ? senderUser.username : null,
 					// avatar: senderUser ? senderUser.avatar : null,
 					distributed: true
@@ -465,9 +467,21 @@ export default {
 
 		async sendMessage({ content, roomId, file, replyMessage }) {
 			const message = {
-				sender_id: this.currentUserId,
+				// sender_id: this.currentUserId,
 				content,
-				timestamp: new Date()
+        createdAt: new Date(),
+        date_time: new Date(),
+        status: "Sin revisar",
+        type: 'generic',
+        updateAt: new Date(),
+        admin: null,
+        sent_by_user: true,
+        user:{
+          firstname: "Samuel",
+          lastname: "cusi",
+          user_id: this.currentUserId,
+          username:"Samuel"
+        }
 			}
 
 			if (file) {
