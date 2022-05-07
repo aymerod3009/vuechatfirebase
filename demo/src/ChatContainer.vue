@@ -12,7 +12,7 @@
 
 		<form @submit.prevent="addRoomUser" v-if="inviteRoomId">
       <select  v-model="invitedUsername">
-        <option v-for="user in users" :key="user._id" :value="user._id">
+        <option v-for="user in users" :key="user.key" :value="user.key">
           {{ user.userName}}
         </option>
       </select>
@@ -216,7 +216,7 @@ export default {
 			if (this.endRooms && !this.startRooms) return (this.roomsLoaded = true)
 
 			let query = roomsRef
-				.where('users', 'array-contains', this.currentUserId)
+				.where('participants', 'array-contains', this.currentUserId)
 				.orderBy('lastUpdated', 'desc')
 				.limit(this.roomsPerPage)
 
@@ -224,6 +224,7 @@ export default {
 
 			const rooms = await query.get()
 			// this.incrementDbCounter('Fetch Rooms', rooms.size)
+      console.log(rooms);
 
 			this.roomsLoaded = rooms.empty || rooms.size < this.roomsPerPage
 
@@ -232,7 +233,7 @@ export default {
 
 			const roomUserIds = []
 			rooms.forEach(room => {
-				room.data().users.forEach(userId => {
+				room.data().participants.forEach(userId => {
 					const foundUser = this.allUsers.find(user => user._id === userId)
 					if (!foundUser && roomUserIds.indexOf(userId) === -1) {
 						roomUserIds.push(userId)
@@ -255,11 +256,11 @@ export default {
 
 			const roomList = {}
 			rooms.forEach(room => {
-				roomList[room.id] = { ...room.data(), users: [] }
+				roomList[room.id] = { ...room.data(), participants: [] }
 
-				room.data().users.forEach(userId => {
+				room.data().participants.forEach(userId => {
 					const foundUser = this.allUsers.find(user => user._id === userId)
-					if (foundUser) roomList[room.id].users.push(foundUser)
+					if (foundUser) roomList[room.id].participants.push(foundUser)
 				})
 			})
 
@@ -268,17 +269,13 @@ export default {
 			Object.keys(roomList).forEach(key => {
 				const room = roomList[key]
 
-				const roomContacts = room.users.filter(
+				const roomContacts = room.participants.filter(
 					user => user._id !== this.currentUserId
 				)
 
-				room.roomName =
-					roomContacts.map(user => user.username).join(', ') || 'Myself'
+				room.roomName = room.title
 
-				const roomAvatar =
-					roomContacts.length === 1 && roomContacts[0].avatar
-						? roomContacts[0].avatar
-						: require('@/assets/logo.png')
+				const roomAvatar = require('@/assets/img.png')
 
 				formattedRooms.push({
 					...room,
@@ -442,7 +439,7 @@ export default {
 		},
 
 		formatMessage(room, message) {
-			const senderUser = room.users.find(
+			const senderUser = room.participants.find(
 				user => message.data().user.user_id === user._id
 			)
 
@@ -525,9 +522,9 @@ export default {
 			let roomId
 
 			this.rooms.forEach(room => {
-				if (room.users.length === 2) {
-					const userId1 = room.users[0]._id
-					const userId2 = room.users[1]._id
+				if (room.participants.length === 2) {
+					const userId1 = room.participants[0]._id
+					const userId2 = room.participants[1]._id
 					if (
 						(userId1 === user._id || userId1 === this.currentUserId) &&
 						(userId2 === user._id || userId2 === this.currentUserId)
@@ -540,7 +537,7 @@ export default {
 			if (roomId) return (this.roomId = roomId)
 
 			const query1 = await roomsRef
-				.where('users', '==', [this.currentUserId, user._id])
+				.where('participants', '==', [this.currentUserId, user._id])
 				.get()
 
 			if (!query1.empty) {
@@ -548,7 +545,7 @@ export default {
 			}
 
 			let query2 = await roomsRef
-				.where('users', '==', [user._id, this.currentUserId])
+				.where('participants', '==', [user._id, this.currentUserId])
 				.get()
 
 			if (!query2.empty) {
@@ -556,7 +553,7 @@ export default {
 			}
 
 			const room = await roomsRef.add({
-				users: [user._id, this.currentUserId],
+        participants: [user._id, this.currentUserId],
 				lastUpdated: new Date()
 			})
 
@@ -729,7 +726,7 @@ export default {
 
 		listenUsersOnlineStatus(rooms) {
 			rooms.map(room => {
-				room.users.map(user => {
+				room.participants.map(user => {
 					const listener = firebase
 						.database()
 						.ref('/status/' + user._id)
@@ -762,7 +759,7 @@ export default {
 		async createRoom() {
 			this.disableForm = true
 			await roomsRef.add({
-				users: [ this.currentUserId],
+        participants: [ this.currentUserId],
         case_id: '626c33009ebc606ee77f4506',
         createdAt: new Date(),
         curator: null,
@@ -803,7 +800,7 @@ export default {
 
 			await roomsRef
 				.doc(this.inviteRoomId)
-				.update({ users: firebase.firestore.FieldValue.arrayUnion(this.invitedUsername) })
+				.update({ participants: firebase.firestore.FieldValue.arrayUnion(this.invitedUsername) })
 
 			this.inviteRoomId = null
 			this.invitedUsername = ''
@@ -813,14 +810,14 @@ export default {
 		removeUser(roomId) {
 			this.resetForms()
 			this.removeRoomId = roomId
-			this.removeUsers = this.rooms.find(room => room.roomId === roomId).users
+			this.removeUsers = this.rooms.find(room => room.roomId === roomId).participants
 		},
 
 		async deleteRoomUser() {
 			this.disableForm = true
 
 			await roomsRef.doc(this.removeRoomId).update({
-				users: firebase.firestore.FieldValue.arrayRemove(this.removeUserId)
+        participants: firebase.firestore.FieldValue.arrayRemove(this.removeUserId)
 			})
 
 			this.removeRoomId = null
@@ -831,8 +828,8 @@ export default {
 		async deleteRoom(roomId) {
 			const room = this.rooms.find(r => r.roomId === roomId)
 			if (
-				room.users.find(user => user._id === 'SGmFnBZB4xxMv9V4CVlW') ||
-				room.users.find(user => user._id === '6jMsIXUrBHBj7o2cRlau')
+				room.participants.find(user => user._id === 'SGmFnBZB4xxMv9V4CVlW') ||
+				room.participants.find(user => user._id === '6jMsIXUrBHBj7o2cRlau')
 			) {
 				return alert('Nope, for demo purposes you cannot delete this room')
 			}

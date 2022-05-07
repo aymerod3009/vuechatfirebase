@@ -53,7 +53,7 @@
 						v-else-if="room.lastMessage"
 						:content="getLastMessage"
 						:deleted="!!room.lastMessage.deleted && !typingUsers"
-						:users="room.users"
+						:users="room.participants"
 						:linkify="false"
 						:text-formatting="textFormatting"
 						:link-options="linkOptions"
@@ -156,11 +156,11 @@ export default {
 				? this.textMessages.MESSAGE_DELETED
 				: this.room.lastMessage.content
 
-			if (this.room.users.length <= 2) {
+			if (this.room.participants.length <= 2) {
 				return content
 			}
 
-			const user = this.room.users.find(
+			const user = this.room.participants.find(
 				user => user._id === this.room.lastMessage.senderId
 			)
 
@@ -173,9 +173,9 @@ export default {
 			return `${user.username} - ${content}`
 		},
 		userStatus() {
-			if (!this.room.users || this.room.users.length !== 2) return
+			if (!this.room.participants || this.room.participants.length !== 2) return
 
-			const user = this.room.users.find(u => u._id !== this.currentUserId)
+			const user = this.room.participants.find(u => u._id !== this.currentUserId)
 			if (user && user.status) return user.status.state
 
 			return null

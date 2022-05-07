@@ -2,7 +2,7 @@ export function roomsValidation(obj) {
 	const roomsValidate = [
 		{ key: 'roomId', type: ['string', 'number'] },
 		{ key: 'roomName', type: ['string'] },
-		{ key: 'users', type: ['array'] }
+		{ key: 'participants', type: ['array'] }
 	]
 
 	const validate = (obj, props) => {

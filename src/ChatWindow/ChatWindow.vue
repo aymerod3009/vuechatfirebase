@@ -225,7 +225,7 @@ export default {
 
 			roomsValidation(val)
 
-			val.users.forEach(user => {
+			val.participants.forEach(user => {
 				partcipantsValidation(user)
 			})
 		},
