@@ -214,9 +214,15 @@ export default {
 
 		async fetchMoreRooms() {
 			if (this.endRooms && !this.startRooms) return (this.roomsLoaded = true)
+      const json = {
+        firstname: 'Braulio',
+        lastname: 'Pomajambo',
+        user_id:this.currentUserId,
+        username: 'Braulio'
+      }
 
 			let query = roomsRef
-				.where('participants', 'array-contains', this.currentUserId)
+				.where('participants', 'array-contains', json)
 				.orderBy('lastUpdated', 'desc')
 				.limit(this.roomsPerPage)
 
@@ -228,13 +234,15 @@ export default {
 
 			this.roomsLoaded = rooms.empty || rooms.size < this.roomsPerPage
 
+      console.log(this.roomsLoaded);
+
 			if (this.startRooms) this.endRooms = this.startRooms
 			this.startRooms = rooms.docs[rooms.docs.length - 1]
 
 			const roomUserIds = []
 			rooms.forEach(room => {
 				room.data().participants.forEach(userId => {
-					const foundUser = this.allUsers.find(user => user._id === userId)
+					const foundUser = this.allUsers.find(user => user._id === userId.user_id)
 					if (!foundUser && roomUserIds.indexOf(userId) === -1) {
 						roomUserIds.push(userId)
 					}
@@ -244,8 +252,9 @@ export default {
 			// this.incrementDbCounter('Fetch Room Users', roomUserIds.length)
 			const rawUsers = []
 			roomUserIds.forEach(userId => {
+        console.log(userId.user_id);
 				const promise = usersRef
-					.doc(userId)
+					.doc(userId.user_id)
 					.get()
 					.then(user => user.data())
 
@@ -259,7 +268,7 @@ export default {
 				roomList[room.id] = { ...room.data(), participants: [] }
 
 				room.data().participants.forEach(userId => {
-					const foundUser = this.allUsers.find(user => user._id === userId)
+					const foundUser = this.allUsers.find(user => user._id === userId.user_id)
 					if (foundUser) roomList[room.id].participants.push(foundUser)
 				})
 			})
@@ -759,7 +768,12 @@ export default {
 		async createRoom() {
 			this.disableForm = true
 			await roomsRef.add({
-        participants: [ this.currentUserId],
+        participants: [{
+          firstname: 'Braulio',
+          lastname: 'Pomajambo',
+          user_id:this.currentUserId,
+          username: 'Braulio'
+        }],
         case_id: '626c33009ebc606ee77f4506',
         createdAt: new Date(),
         curator: null,
