@@ -24,7 +24,7 @@ export const db = app.firestore()
 export const storageRef = app.storage().ref()
 
 export const usersRef = db.collection('users')
-export const roomsRef = db.collection('chat_rotafono')
+export const roomsRef = db.collection('chat_rotafono_dev')
 export const messagesRef = roomId => roomsRef.doc(roomId).collection('chat')
 
 export const filesRef = storageRef.child('files')

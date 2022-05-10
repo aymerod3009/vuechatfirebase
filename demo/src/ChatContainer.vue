@@ -215,15 +215,15 @@ export default {
 		async fetchMoreRooms() {
 			if (this.endRooms && !this.startRooms) return (this.roomsLoaded = true)
       const json = {
-        firstname: 'Braulio',
-        lastname: 'Pomajambo',
+        firstname: 'Rodson',
+        lastname: 'Ayme Tambra',
         user_id:this.currentUserId,
-        username: 'Braulio'
+        username: 'Rodson'
       }
 
 			let query = roomsRef
 				.where('participants', 'array-contains', json)
-				.orderBy('lastUpdated', 'desc')
+				.orderBy('updateAt', 'desc')
 				.limit(this.roomsPerPage)
 
 			if (this.startRooms) query = query.startAfter(this.startRooms)
@@ -290,12 +290,12 @@ export default {
 					...room,
 					roomId: key,
 					avatar: roomAvatar,
-					index: room.lastUpdated.seconds,
+					index: room.updateAt.seconds,
 					lastMessage: {
 						content: 'Room created',
 						timestamp: this.formatTimestamp(
-							new Date(room.lastUpdated.seconds),
-							room.lastUpdated
+							new Date(room.updateAt.seconds),
+							room.updateAt
 						)
 					}
 				})
@@ -520,7 +520,7 @@ export default {
 
 			if (file) this.uploadFile({ file, messageId: id, roomId })
 
-			roomsRef.doc(roomId).update({ lastUpdated: new Date() })
+			roomsRef.doc(roomId).update({ updateAt: new Date() })
 		},
 
 		openFile({ message }) {
@@ -563,7 +563,7 @@ export default {
 
 			const room = await roomsRef.add({
         participants: [user._id, this.currentUserId],
-				lastUpdated: new Date()
+				updateAt: new Date()
 			})
 
 			this.roomId = room.id
@@ -573,7 +573,7 @@ export default {
 		async loadRoom(query) {
 			query.forEach(async room => {
 				if (this.loadingRooms) return
-				await roomsRef.doc(room.id).update({ lastUpdated: new Date() })
+				await roomsRef.doc(room.id).update({ updateAt: new Date() })
 				this.roomId = room.id
 				this.fetchRooms()
 			})
@@ -696,7 +696,7 @@ export default {
 					const foundRoom = this.rooms.find(r => r.roomId === room.id)
 					if (foundRoom) {
 						foundRoom.typingUsers = room.data().typingUsers
-						foundRoom.index = room.data().lastUpdated.seconds
+						foundRoom.index = room.data().updateAt.seconds
 					}
 				})
 			})
@@ -796,7 +796,7 @@ export default {
           user_id: '626aa97448f69d556274966f',
           username: 'Samuel'
         },
-				lastUpdated: new Date()
+				updateAt: new Date()
 			})
 
 			this.addNewRoom = false
